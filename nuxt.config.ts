@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
+import type { PluginOption } from "vite";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   runtimeConfig: {
@@ -6,6 +7,9 @@ export default defineNuxtConfig({
       appwriteEndpoint: process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT,
       appwriteProjectId: process.env.NUXT_PUBLIC_APPWRITE_PROJECT_ID,
       appwriteProjectName: process.env.NUXT_PUBLIC_APPWRITE_PROJECT_NAME,
+      appwriteDatabaseId: process.env.NUXT_PUBLIC_APPWRITE_DATABASE_ID,
+      appwritePersonCollectionId: process.env.NUXT_PUBLIC_APPWRITE_PERSON_COLLECTION_ID,
+      appwriteChatCollectionId: process.env.NUXT_PUBLIC_APPWRITE_CHAT_COLLECTION_ID || "chats",
     },
   },
   compatibilityDate: '2024-04-03',
@@ -40,7 +44,7 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [
-      tailwindcss(),
+      tailwindcss() as unknown as PluginOption,
     ],
   },
 })
