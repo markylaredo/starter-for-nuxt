@@ -1,4 +1,4 @@
-import { Account, Client, Databases } from "appwrite";
+import { Account, Client, Databases, Messaging } from "appwrite";
 
 const client = new Client()
   .setEndpoint("https://appwrite.solodevmark.com/v1")
@@ -6,5 +6,6 @@ const client = new Client()
 
 const account = new Account(client);
 const databases = new Databases(client);
+const messaging = new Messaging(client);
 
-export { account, client, databases };
+export { account, client, databases, messaging };

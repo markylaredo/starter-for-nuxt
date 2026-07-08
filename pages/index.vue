@@ -97,7 +97,7 @@
       </button>
     </section>
 
-    <div class="grid grid-rows-3 gap-7 lg:grid-cols-3 lg:grid-rows-none">
+    <div class="grid grid-rows-4 gap-7 lg:grid-cols-4 lg:grid-rows-none">
       <div class="flex h-full w-72 flex-col gap-2 rounded-md border border-[#EDEDF0] bg-white p-4">
         <h2 class="text-xl font-light text-[#2D2D31]">Edit your app</h2>
         <p>
@@ -129,6 +129,18 @@
           <p>Discover the full power of Appwrite by diving into our documentation.</p>
         </div>
       </a>
+
+      <NuxtLink to="/push-notifications">
+        <div
+          class="flex h-full w-72 flex-col gap-2 rounded-md border border-[#EDEDF0] bg-white p-4"
+        >
+          <div class="flex flex-row items-center justify-between">
+            <h2 class="text-xl font-light text-[#2D2D31]">Push demo</h2>
+            <span class="icon-arrow-right text-[#D8D8DB]"></span>
+          </div>
+          <p>Register a push target and subscribe it to an Appwrite Messaging topic.</p>
+        </div>
+      </NuxtLink>
     </div>
 
     <aside class="fixed bottom-0 flex w-full cursor-pointer border-t border-[#EDEDF0] bg-white">

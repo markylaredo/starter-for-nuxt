@@ -1,3 +1,7 @@
+overrides:
+  '@nuxt/cli': 3.32.0
+  srvx: 0.11.21
+
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true

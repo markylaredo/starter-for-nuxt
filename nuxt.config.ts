@@ -10,10 +10,15 @@ export default defineNuxtConfig({
       appwriteDatabaseId: process.env.NUXT_PUBLIC_APPWRITE_DATABASE_ID,
       appwritePersonCollectionId: process.env.NUXT_PUBLIC_APPWRITE_PERSON_COLLECTION_ID,
       appwriteChatCollectionId: process.env.NUXT_PUBLIC_APPWRITE_CHAT_COLLECTION_ID || "chats",
+      appwritePushProviderId:
+        process.env.NUXT_PUBLIC_APPWRITE_PUSH_PROVIDER_ID || "6a4e0c49003d44484602",
     },
   },
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
+  experimental: {
+    appManifest: false,
+  },
   css: [
     '@/assets/app.css',
     '@appwrite.io/pink-icons',
