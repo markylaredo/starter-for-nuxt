@@ -2,6 +2,8 @@ import { ID, type Models } from "appwrite";
 import { account, messaging } from "~/lib/appwrite";
 
 const pushTargetStorageKey = "omeco.pushTargetId";
+const pushSubscriberStorageKey = "omeco.pushSubscriberId";
+const pushTopicStorageKey = "omeco.pushTopicId";
 
 export interface RegisterPushTargetOptions {
   identifier: string;
@@ -50,7 +52,8 @@ export function usePushNotifications() {
       storeTargetId(registeredTarget.$id);
 
       if (options.topicId) {
-        await subscribeTargetToTopic(options.topicId, registeredTarget.$id);
+        const subscriber = await subscribeTargetToTopic(options.topicId, registeredTarget.$id);
+        storeSubscriber(options.topicId, subscriber.$id);
       }
 
       return registeredTarget;
@@ -67,6 +70,8 @@ export function usePushNotifications() {
 
   async function unregisterPushTarget() {
     const targetId = target.value?.$id || getStoredTargetId();
+    const subscriberId = getStoredSubscriberId();
+    const topicId = getStoredTopicId();
 
     if (!targetId) {
       return;
@@ -76,9 +81,20 @@ export function usePushNotifications() {
     error.value = "";
 
     try {
+      if (topicId && subscriberId) {
+        try {
+          await messaging.deleteSubscriber({ topicId, subscriberId });
+        } catch (err) {
+          if (!isNotFoundError(err)) {
+            throw err;
+          }
+        }
+      }
+
       await account.deletePushTarget({ targetId });
       target.value = null;
       clearStoredTargetId();
+      clearStoredSubscriber();
     } catch (err) {
       error.value = getPushNotificationErrorMessage(
         err,
@@ -146,6 +162,36 @@ function storeTargetId(targetId: string) {
 function clearStoredTargetId() {
   if (import.meta.client) {
     localStorage.removeItem(pushTargetStorageKey);
+  }
+}
+
+function getStoredSubscriberId() {
+  if (!import.meta.client) {
+    return "";
+  }
+
+  return localStorage.getItem(pushSubscriberStorageKey) || "";
+}
+
+function getStoredTopicId() {
+  if (!import.meta.client) {
+    return "";
+  }
+
+  return localStorage.getItem(pushTopicStorageKey) || "";
+}
+
+function storeSubscriber(topicId: string, subscriberId: string) {
+  if (import.meta.client) {
+    localStorage.setItem(pushTopicStorageKey, topicId);
+    localStorage.setItem(pushSubscriberStorageKey, subscriberId);
+  }
+}
+
+function clearStoredSubscriber() {
+  if (import.meta.client) {
+    localStorage.removeItem(pushTopicStorageKey);
+    localStorage.removeItem(pushSubscriberStorageKey);
   }
 }
 
