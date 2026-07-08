@@ -95,6 +95,13 @@
       >
         <span class="text-white">Send a ping</span>
       </button>
+
+      <NuxtLink
+        to="/login"
+        class="mt-3 inline-flex min-h-11 items-center justify-center rounded-md border border-[#C9CDD6] bg-white px-4 py-2 font-medium text-[#2D2D31] transition hover:bg-[#F7F8FA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FD366E]"
+      >
+        Account login
+      </NuxtLink>
     </section>
 
     <div class="grid grid-rows-4 gap-7 lg:grid-cols-4 lg:grid-rows-none">
@@ -139,6 +146,30 @@
             <span class="icon-arrow-right text-[#D8D8DB]"></span>
           </div>
           <p>Register a push target and subscribe it to an Appwrite Messaging topic.</p>
+        </div>
+      </NuxtLink>
+
+      <NuxtLink to="/login">
+        <div
+          class="flex h-full w-72 flex-col gap-2 rounded-md border border-[#EDEDF0] bg-white p-4"
+        >
+          <div class="flex flex-row items-center justify-between">
+            <h2 class="text-xl font-light text-[#2D2D31]">Account auth</h2>
+            <span class="icon-arrow-right text-[#D8D8DB]"></span>
+          </div>
+          <p>Sign in or create an Appwrite account session for user features.</p>
+        </div>
+      </NuxtLink>
+
+      <NuxtLink to="/dashboard">
+        <div
+          class="flex h-full w-72 flex-col gap-2 rounded-md border border-[#EDEDF0] bg-white p-4"
+        >
+          <div class="flex flex-row items-center justify-between">
+            <h2 class="text-xl font-light text-[#2D2D31]">Dashboard</h2>
+            <span class="icon-arrow-right text-[#D8D8DB]"></span>
+          </div>
+          <p>Open the signed-in workspace for account-backed app tools.</p>
         </div>
       </NuxtLink>
     </div>

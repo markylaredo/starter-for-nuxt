@@ -44,14 +44,22 @@
         class="flex flex-col gap-3 rounded-md border border-[#F6C453] bg-[#FFF8E6] p-4 text-[#6E5200] sm:flex-row sm:items-center sm:justify-between"
       >
         <span>Push target registration requires an Appwrite account session.</span>
-        <button
-          type="button"
-          class="inline-flex min-h-11 items-center justify-center rounded-md border border-[#D89B00] bg-white px-4 py-2 font-medium text-[#6E5200] transition hover:bg-[#FFF3CC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D89B00] disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="creatingDemoSession"
-          @click="createDemoSession"
-        >
-          {{ creatingDemoSession ? 'Creating session...' : 'Continue as demo user' }}
-        </button>
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <NuxtLink
+            to="/login?redirect=/push-notifications"
+            class="inline-flex min-h-11 items-center justify-center rounded-md bg-[#FD366E] px-4 py-2 font-medium text-white transition hover:bg-[#E52E62] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FD366E]"
+          >
+            Login or sign up
+          </NuxtLink>
+          <button
+            type="button"
+            class="inline-flex min-h-11 items-center justify-center rounded-md border border-[#D89B00] bg-white px-4 py-2 font-medium text-[#6E5200] transition hover:bg-[#FFF3CC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D89B00] disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="creatingDemoSession"
+            @click="createDemoSession"
+          >
+            {{ creatingDemoSession ? 'Creating session...' : 'Demo user' }}
+          </button>
+        </div>
       </section>
 
       <section
