@@ -3,6 +3,8 @@ import type { PluginOption } from "vite";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   runtimeConfig: {
+    adminApiToken: process.env.ADMIN_API_TOKEN || "",
+    appwriteApiKey: process.env.APPWRITE_API_KEY || "",
     public: {
       appwriteEndpoint: process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT,
       appwriteProjectId: process.env.NUXT_PUBLIC_APPWRITE_PROJECT_ID,
@@ -12,6 +14,13 @@ export default defineNuxtConfig({
       appwriteChatCollectionId: process.env.NUXT_PUBLIC_APPWRITE_CHAT_COLLECTION_ID || "chats",
       appwritePushProviderId:
         process.env.NUXT_PUBLIC_APPWRITE_PUSH_PROVIDER_ID || "6a4e0c49003d44484602",
+      firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || "",
+      firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+      firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || "",
+      firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+      firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+      firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || "",
+      firebaseVapidKey: process.env.NUXT_PUBLIC_FIREBASE_VAPID_KEY || "",
     },
   },
   compatibilityDate: '2024-04-03',
