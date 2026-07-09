@@ -61,8 +61,27 @@
       <div class="grid gap-6 lg:grid-cols-[minmax(20rem,24rem)_1fr] lg:items-start">
         <section class="grid gap-6">
           <div class="rounded-md border border-[#E1E4EA] bg-white p-5 shadow-sm">
-            <h2 class="text-xl font-semibold text-[#2D2D31]">Configured bucket</h2>
-            <p class="mt-2 break-all text-sm leading-6 text-[#56565C]">{{ bucketId || "Not configured" }}</p>
+            <h2 class="text-xl font-semibold text-[#2D2D31]">Active bucket</h2>
+            <p class="mt-2 break-all text-sm leading-6 text-[#56565C]">
+              {{ bucketId || "Create or select a bucket" }}
+            </p>
+
+            <label class="mt-5 grid gap-1.5">
+              <span class="font-medium text-[#2D2D31]">Use bucket</span>
+              <select
+                v-model="activeBucketId"
+                class="min-h-11 rounded-md border border-[#C9CDD6] bg-white px-3 py-2 text-base text-[#2D2D31] outline-none transition focus:border-[#FD366E] focus:ring-2 focus:ring-[#FD366E33]"
+                :disabled="loadingBuckets || buckets.length === 0"
+              >
+                <option value="" disabled>Select a bucket</option>
+                <option v-for="bucket in buckets" :key="bucket.$id" :value="bucket.$id">
+                  {{ bucket.name }} ({{ bucket.$id }})
+                </option>
+              </select>
+              <span class="text-sm leading-6 text-[#6F6F76]">
+                The configured env bucket is {{ configuredBucketId || "not set" }}.
+              </span>
+            </label>
 
             <div class="mt-5 grid gap-3 text-sm">
               <div class="rounded-md bg-[#FAFAFB] p-3">
@@ -83,6 +102,88 @@
               </div>
             </div>
           </div>
+
+          <form
+            class="rounded-md border border-[#E1E4EA] bg-white p-5 shadow-sm"
+            @submit.prevent="submitCreateBucket"
+          >
+            <h2 class="text-xl font-semibold text-[#2D2D31]">Create bucket</h2>
+            <p class="mt-1 text-sm leading-6 text-[#6F6F76]">
+              Creates an Appwrite Storage bucket through the protected server endpoint.
+            </p>
+
+            <div class="mt-5 grid gap-4">
+              <label class="grid gap-1.5">
+                <span class="font-medium text-[#2D2D31]">Admin API token *</span>
+                <input
+                  v-model.trim="adminToken"
+                  type="password"
+                  autocomplete="off"
+                  class="min-h-11 rounded-md border border-[#C9CDD6] bg-white px-3 py-2 text-base text-[#2D2D31] outline-none transition focus:border-[#FD366E] focus:ring-2 focus:ring-[#FD366E33]"
+                  required
+                />
+                <span class="text-sm leading-6 text-[#6F6F76]">
+                  Must match server-side ADMIN_API_TOKEN.
+                </span>
+              </label>
+
+              <label class="grid gap-1.5">
+                <span class="font-medium text-[#2D2D31]">Name *</span>
+                <input
+                  v-model.trim="bucketForm.name"
+                  type="text"
+                  class="min-h-11 rounded-md border border-[#C9CDD6] bg-white px-3 py-2 text-base text-[#2D2D31] outline-none transition focus:border-[#FD366E] focus:ring-2 focus:ring-[#FD366E33]"
+                  required
+                />
+                <span class="text-sm leading-6 text-[#6F6F76]">
+                  Bucket ID is generated automatically from the name.
+                </span>
+              </label>
+
+              <label class="grid gap-1.5">
+                <span class="font-medium text-[#2D2D31]">Maximum file size (MB)</span>
+                <input
+                  v-model.number="bucketForm.maximumFileSizeMb"
+                  type="number"
+                  min="1"
+                  max="5120"
+                  class="min-h-11 rounded-md border border-[#C9CDD6] bg-white px-3 py-2 text-base text-[#2D2D31] outline-none transition focus:border-[#FD366E] focus:ring-2 focus:ring-[#FD366E33]"
+                />
+              </label>
+
+              <label class="grid gap-1.5">
+                <span class="font-medium text-[#2D2D31]">Allowed extensions</span>
+                <input
+                  v-model.trim="allowedExtensionsInput"
+                  type="text"
+                  placeholder="jpg, png, pdf"
+                  class="min-h-11 rounded-md border border-[#C9CDD6] bg-white px-3 py-2 text-base text-[#2D2D31] outline-none transition focus:border-[#FD366E] focus:ring-2 focus:ring-[#FD366E33]"
+                />
+                <span class="text-sm leading-6 text-[#6F6F76]">
+                  Leave blank to allow every file extension.
+                </span>
+              </label>
+
+              <label class="grid gap-1.5">
+                <span class="font-medium text-[#2D2D31]">Access</span>
+                <select
+                  v-model="bucketForm.access"
+                  class="min-h-11 rounded-md border border-[#C9CDD6] bg-white px-3 py-2 text-base text-[#2D2D31] outline-none transition focus:border-[#FD366E] focus:ring-2 focus:ring-[#FD366E33]"
+                >
+                  <option value="authenticated">Signed-in users</option>
+                  <option value="public-read">Public read, signed-in writes</option>
+                </select>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              class="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[#FD366E] px-4 py-2 font-medium text-white transition hover:bg-[#E52E62] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FD366E] disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="creatingBucket || !adminToken"
+            >
+              {{ creatingBucket ? "Creating..." : "Create storage bucket" }}
+            </button>
+          </form>
 
           <form
             class="rounded-md border border-[#E1E4EA] bg-white p-5 shadow-sm"
@@ -262,9 +363,13 @@
 import type { Models } from "appwrite";
 
 const {
+  activeBucketId,
   bucketId,
   buckets,
   configurationError,
+  configuredBucketId,
+  createBucket,
+  creatingBucket,
   deletingId,
   error,
   files,
@@ -284,12 +389,32 @@ const {
 } = useStorageDemo();
 const { error: authError, loadUser } = useAuth();
 
+const adminToken = ref("");
+const allowedExtensionsInput = ref("");
 const selectedFile = ref<File | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
+const bucketForm = reactive({
+  access: "authenticated" as "authenticated" | "public-read",
+  maximumFileSizeMb: 10,
+  name: "",
+});
 
 onMounted(async () => {
+  adminToken.value = sessionStorage.getItem("omeco.adminToken") || "";
   await loadUser();
   await refreshAll();
+});
+
+watch(adminToken, (value) => {
+  sessionStorage.setItem("omeco.adminToken", value);
+});
+
+watch(activeBucketId, async () => {
+  if (bucketId.value) {
+    await listFiles();
+  } else {
+    files.value = [];
+  }
 });
 
 async function refreshAll() {
@@ -297,6 +422,31 @@ async function refreshAll() {
 
   if (!configurationError.value) {
     await listFiles();
+  }
+}
+
+async function submitCreateBucket() {
+  const name = bucketForm.name.trim();
+
+  if (!name) {
+    error.value = "Bucket name is required.";
+    return;
+  }
+
+  await createBucket(
+    {
+      access: bucketForm.access,
+      allowedFileExtensions: normalizeExtensions(allowedExtensionsInput.value),
+      maximumFileSizeMb: Number(bucketForm.maximumFileSizeMb || 10),
+      name,
+    },
+    adminToken.value,
+  );
+
+  if (!error.value) {
+    bucketForm.name = "";
+    bucketForm.maximumFileSizeMb = 10;
+    allowedExtensionsInput.value = "";
   }
 }
 
@@ -349,5 +499,12 @@ function formatDate(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function normalizeExtensions(value: string) {
+  return value
+    .split(",")
+    .map((extension) => extension.trim().replace(/^\./, "").toLowerCase())
+    .filter(Boolean);
 }
 </script>

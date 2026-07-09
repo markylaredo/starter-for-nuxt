@@ -33,6 +33,14 @@ export type BucketSummary = {
   permissions: string[];
 };
 
+export type CreateBucketRequest = {
+  access: "authenticated" | "public-read";
+  allowedFileExtensions: string[];
+  bucketId?: string;
+  maximumFileSizeMb: number;
+  name: string;
+};
+
 const idPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,35}$/;
 
 export function assertAdminRequest(event: Parameters<typeof getHeader>[0]) {
@@ -97,6 +105,44 @@ export function normalizePushPayload(body: Partial<SendPushRequest>): SendPushRe
   };
 }
 
+export function normalizeBucketPayload(body: Partial<CreateBucketRequest>): CreateBucketRequest {
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const maximumFileSizeMb = Number(body.maximumFileSizeMb || 10);
+  const allowedFileExtensions = Array.isArray(body.allowedFileExtensions)
+    ? body.allowedFileExtensions
+        .filter((extension): extension is string => typeof extension === "string")
+        .map((extension) => extension.trim().replace(/^\./, "").toLowerCase())
+        .filter(Boolean)
+        .slice(0, 100)
+    : [];
+
+  if (!name) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "name is required.",
+    });
+  }
+
+  const bucketId = body.bucketId
+    ? sanitizeId(body.bucketId, "bucketId")
+    : createBucketId(name);
+
+  if (!Number.isFinite(maximumFileSizeMb) || maximumFileSizeMb < 1 || maximumFileSizeMb > 5120) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "maximumFileSizeMb must be between 1 and 5120.",
+    });
+  }
+
+  return {
+    access: body.access === "public-read" ? "public-read" : "authenticated",
+    allowedFileExtensions,
+    bucketId,
+    maximumFileSizeMb,
+    name,
+  };
+}
+
 export async function ensureTopic(payload: CreateTopicRequest) {
   const existing = await appwriteAdminRequest(`/messaging/topics/${payload.topicId}`, {
     expectedStatuses: [200, 404],
@@ -128,6 +174,28 @@ export async function listTopics() {
       ? topic.subscribe.filter((role): role is string => typeof role === "string")
       : [],
   }));
+}
+
+export async function createBucket(payload: CreateBucketRequest) {
+  const response = await appwriteAdminRequest("/storage/buckets", {
+    method: "POST",
+    body: {
+      bucketId: payload.bucketId,
+      name: payload.name,
+      permissions: bucketPermissions(payload.access),
+      fileSecurity: false,
+      enabled: true,
+      maximumFileSize: Math.round(payload.maximumFileSizeMb * 1024 * 1024),
+      allowedFileExtensions: payload.allowedFileExtensions,
+      compression: "none",
+      encryption: false,
+      antivirus: false,
+      transformations: true,
+    },
+    expectedStatuses: [201],
+  });
+
+  return response.data;
 }
 
 export async function listBuckets() {
@@ -227,6 +295,34 @@ function sanitizeId(value: string, label: string) {
   }
 
   return trimmed;
+}
+
+function bucketPermissions(access: CreateBucketRequest["access"]) {
+  const signedInPermissions = [
+    'create("users")',
+    'read("users")',
+    'update("users")',
+    'delete("users")',
+  ];
+
+  if (access === "public-read") {
+    return ['read("any")', 'create("users")', 'update("users")', 'delete("users")'];
+  }
+
+  return signedInPermissions;
+}
+
+function createBucketId(name: string) {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^[^a-z0-9]+/, "")
+    .replace(/[^a-z0-9]+$/, "")
+    .slice(0, 24) || "bucket";
+  const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+
+  return sanitizeId(`${slug}-${suffix}`, "bucketId");
 }
 
 function normalizeStringMap(value: unknown) {

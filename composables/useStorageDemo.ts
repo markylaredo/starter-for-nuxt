@@ -10,11 +10,21 @@ export type StorageBucketSummary = {
   permissions: string[];
 };
 
+export type CreateStorageBucketPayload = {
+  access: "authenticated" | "public-read";
+  allowedFileExtensions: string[];
+  maximumFileSizeMb: number;
+  name: string;
+};
+
 export function useStorageDemo() {
   const config = useRuntimeConfig();
 
-  const bucketId = computed(() => config.public.appwriteStorageBucketId || "");
+  const configuredBucketId = computed(() => config.public.appwriteStorageBucketId || "");
+  const activeBucketId = ref(configuredBucketId.value);
+  const bucketId = computed(() => activeBucketId.value || configuredBucketId.value);
   const buckets = ref<StorageBucketSummary[]>([]);
+  const creatingBucket = ref(false);
   const files = ref<Models.File[]>([]);
   const loadingBuckets = ref(false);
   const loadingFiles = ref(false);
@@ -30,7 +40,7 @@ export function useStorageDemo() {
 
   const configurationError = computed(() => {
     if (!bucketId.value) {
-      return "Set NUXT_PUBLIC_APPWRITE_STORAGE_BUCKET_ID to enable the storage demo.";
+      return "Create or select a storage bucket before uploading files.";
     }
 
     return "";
@@ -43,6 +53,10 @@ export function useStorageDemo() {
     try {
       const response = await $fetch<{ buckets: StorageBucketSummary[] }>("/api/storage/buckets");
       buckets.value = response.buckets;
+
+      if (!activeBucketId.value && configuredBucketId.value) {
+        activeBucketId.value = configuredBucketId.value;
+      }
     } catch (err) {
       error.value = getStorageErrorMessage(err, "Unable to load storage buckets.");
     } finally {
@@ -70,6 +84,36 @@ export function useStorageDemo() {
       error.value = getStorageErrorMessage(err, "Unable to load files.");
     } finally {
       loadingFiles.value = false;
+    }
+  }
+
+  async function createBucket(payload: CreateStorageBucketPayload, adminToken: string) {
+    creatingBucket.value = true;
+    error.value = "";
+    success.value = "";
+
+    try {
+      await $fetch("/api/admin/storage/buckets", {
+        method: "POST",
+        headers: {
+          "x-admin-token": adminToken,
+        },
+        body: payload,
+      });
+
+      const bucketId = getCreatedBucketId(response);
+
+      if (bucketId) {
+        activeBucketId.value = bucketId;
+      }
+
+      success.value = `Storage bucket ${bucketId || payload.name} created.`;
+      await listBuckets();
+      await listFiles();
+    } catch (err) {
+      error.value = getStorageErrorMessage(err, "Unable to create storage bucket.");
+    } finally {
+      creatingBucket.value = false;
     }
   }
 
@@ -153,9 +197,13 @@ export function useStorageDemo() {
   }
 
   return {
+    activeBucketId,
     bucketId,
     buckets,
     configurationError,
+    configuredBucketId,
+    createBucket,
+    creatingBucket,
     deletingId,
     error,
     files,
@@ -173,6 +221,21 @@ export function useStorageDemo() {
     uploading,
     deleteFile,
   };
+}
+
+function getCreatedBucketId(response: unknown) {
+  if (
+    response &&
+    typeof response === "object" &&
+    "bucket" in response &&
+    response.bucket &&
+    typeof response.bucket === "object" &&
+    "$id" in response.bucket
+  ) {
+    return String(response.bucket.$id || "");
+  }
+
+  return "";
 }
 
 function getStorageErrorMessage(err: unknown, fallback: string) {
