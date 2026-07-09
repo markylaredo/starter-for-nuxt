@@ -24,6 +24,15 @@ export type TopicSummary = {
   subscribe: string[];
 };
 
+export type BucketSummary = {
+  $id: string;
+  name: string;
+  enabled: boolean;
+  maximumFileSize: number;
+  allowedFileExtensions: string[];
+  permissions: string[];
+};
+
 const idPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,35}$/;
 
 export function assertAdminRequest(event: Parameters<typeof getHeader>[0]) {
@@ -117,6 +126,26 @@ export async function listTopics() {
     name: String(topic.name || topic.$id || ""),
     subscribe: Array.isArray(topic.subscribe)
       ? topic.subscribe.filter((role): role is string => typeof role === "string")
+      : [],
+  }));
+}
+
+export async function listBuckets() {
+  const response = await appwriteAdminRequest("/storage/buckets", {
+    expectedStatuses: [200],
+  });
+  const buckets = Array.isArray(response.data?.buckets) ? response.data.buckets : [];
+
+  return buckets.map((bucket: Record<string, unknown>): BucketSummary => ({
+    $id: String(bucket.$id || ""),
+    name: String(bucket.name || bucket.$id || ""),
+    enabled: Boolean(bucket.enabled),
+    maximumFileSize: Number(bucket.maximumFileSize || 0),
+    allowedFileExtensions: Array.isArray(bucket.allowedFileExtensions)
+      ? bucket.allowedFileExtensions.filter((extension): extension is string => typeof extension === "string")
+      : [],
+    permissions: Array.isArray(bucket.$permissions)
+      ? bucket.$permissions.filter((permission): permission is string => typeof permission === "string")
       : [],
   }));
 }

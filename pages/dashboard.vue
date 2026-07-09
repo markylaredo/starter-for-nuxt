@@ -1,33 +1,6 @@
 <template>
-  <main class="min-h-dvh bg-[#F7F8FA] text-[#2D2D31]">
-    <div class="mx-auto grid min-h-dvh max-w-7xl lg:grid-cols-[16rem_1fr]">
-      <aside class="border-b border-[#E1E4EA] bg-white px-4 py-4 lg:border-r lg:border-b-0">
-        <div class="flex items-center justify-between gap-3 lg:block">
-          <div>
-            <p class="text-xs font-semibold uppercase text-[#6F6F76]">Workspace</p>
-            <h1 class="mt-1 font-[Poppins] text-2xl font-light">Operations</h1>
-          </div>
-          <NuxtLink
-            to="/"
-            class="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-[#56565C] underline-offset-4 hover:text-[#2D2D31] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FD366E]"
-          >
-            Home
-          </NuxtLink>
-        </div>
-
-        <nav class="mt-5 grid gap-1 text-sm">
-          <NuxtLink
-            v-for="item in navigation"
-            :key="item.to"
-            :to="item.to"
-            class="flex min-h-11 items-center rounded-md px-3 py-2 font-medium text-[#56565C] transition hover:bg-[#F7F8FA] hover:text-[#2D2D31] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FD366E]"
-          >
-            {{ item.label }}
-          </NuxtLink>
-        </nav>
-      </aside>
-
-      <section class="px-4 py-6 sm:px-6 lg:px-8">
+  <main class="px-4 py-6 text-[#2D2D31] sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-6xl">
         <header class="flex flex-col gap-4 border-b border-[#E1E4EA] pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p class="text-sm font-medium text-[#6F6F76]">Dashboard</p>
@@ -106,7 +79,6 @@
             </div>
           </section>
         </template>
-      </section>
     </div>
   </main>
 </template>
@@ -118,14 +90,6 @@ const { checking, configurationError, error, loadUser, loading, logout, user } =
 
 const ready = ref(false);
 const { appwriteEndpoint, appwriteProjectId, appwriteProjectName } = config.public;
-
-const navigation = [
-  { label: "Dashboard", to: "/dashboard" },
-  { label: "Push notifications", to: "/push-notifications" },
-  { label: "People", to: "/persons" },
-  { label: "Chat", to: "/chat" },
-  { label: "Admin messaging", to: "/admin-messaging" },
-];
 
 const workAreas = [
   {
@@ -142,6 +106,11 @@ const workAreas = [
     title: "Realtime chat",
     description: "Test database-backed realtime messages with connected browser sessions.",
     to: "/chat",
+  },
+  {
+    title: "Storage files",
+    description: "Retrieve buckets, upload files, and test preview or download links.",
+    to: "/storage-demo",
   },
   {
     title: "Admin messaging",

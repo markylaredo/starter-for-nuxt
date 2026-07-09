@@ -1,4 +1,4 @@
-import { Account, Client, Databases, Messaging } from "appwrite";
+import { Account, Client, Databases, Messaging, Storage } from "appwrite";
 
 const client = new Client();
 let configuredEndpoint = "";
@@ -33,8 +33,9 @@ export function isAppwriteConfigured() {
 const account = new Account(client);
 const databases = new Databases(client);
 const messaging = new Messaging(client);
+const storage = new Storage(client);
 
-export { account, client, databases, messaging };
+export { account, client, databases, messaging, storage };
 
 function isValidUrl(value: string) {
   try {
